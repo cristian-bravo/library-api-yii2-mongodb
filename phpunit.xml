@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php"
+         colors="true"
+         failOnWarning="false"
+         failOnRisky="false"
+         cacheResult="false">
+    <testsuites>
+        <testsuite name="API">
+            <directory>tests/Api</directory>
+        </testsuite>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="error_reporting" value="-1"/>
+        <server name="APP_ENV" value="test"/>
+        <server name="APP_DEBUG" value="true"/>
+        <server name="MONGO_URI" value="mongodb://localhost:27017/library_db"/>
+        <server name="TOKEN_TTL" value="1800"/>
+        <server name="API_PAGE_SIZE" value="20"/>
+        <server name="API_MAX_PAGE_SIZE" value="100"/>
+        <server name="BOOTSTRAP_ADMIN_USER" value="true"/>
+        <server name="BOOTSTRAP_ADMIN_USERNAME" value="admin"/>
+        <server name="BOOTSTRAP_ADMIN_PASSWORD" value="Admin123!"/>
+        <server name="COOKIE_VALIDATION_KEY" value="test-cookie-key"/>
+    </php>
+</phpunit>
