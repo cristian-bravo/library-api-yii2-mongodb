@@ -284,5 +284,5 @@ Proyecto para demostrar el diseño e implementación de una API REST escalable c
 ## Autor
 
 Cristian Bravo  
-Ingeniero en Sistemas  
-Desarrollador Backend
+Desarrollador Full-Stack 
+
