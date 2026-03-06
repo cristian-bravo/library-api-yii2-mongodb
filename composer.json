@@ -1,0 +1,48 @@
+{
+  "name": "libelulasoft/library-api",
+  "description": "REST API de biblioteca virtual con Yii2 y MongoDB",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "ext-mongodb": "*",
+    "php": "^8.1",
+    "vlucas/phpdotenv": "^5.6",
+    "symfony/yaml": "^7.2",
+    "yiisoft/yii2": "^2.0.52",
+    "yiisoft/yii2-mongodb": "^2.1"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.66",
+    "phpunit/phpunit": "^10.5"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    }
+  ],
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "app\\": ""
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "serve": "php yii serve --port=8080",
+    "openapi:build": "php scripts/tools/openapi-build.php",
+    "migrate:mongo": "php yii mongodb-migrate/up --interactive=0",
+    "migrate:mongo:down": "php yii mongodb-migrate/down 1 --interactive=0",
+    "test": "phpunit",
+    "cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php",
+    "cs:check": "php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php"
+  }
+}

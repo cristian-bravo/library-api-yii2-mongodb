@@ -1,0 +1,23 @@
+/vendor/
+/runtime/
+/web/assets/
+/coverage/
+/.phpunit.result.cache
+
+.env
+.env.*
+!.env.example
+
+*.log
+
+.idea/
+.vscode/
+.DS_Store
+
+# OpenAPI strategy:
+# - Keep docs/swagger.yaml versioned as published artifact.
+# - Ignore local generated bundle artifact.
+/modules/api/docs/openapi.generated.yaml
+
+# Local prompt notes should never be versioned.
+/docs/PROMPTS.md
