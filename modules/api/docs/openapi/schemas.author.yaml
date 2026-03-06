@@ -1,0 +1,92 @@
+Author:
+  type: object
+  properties:
+    id:
+      type: string
+      example: 65f6f18e79ad6f8a3fca53ff
+    full_name:
+      type: string
+      example: Robert C. Martin
+    birth_date:
+      type: string
+      format: date
+      example: '1952-12-05'
+    books:
+      type: array
+      items:
+        type: string
+        example: 65f6f18e79ad6f8a3fca53a1
+
+AuthorExpanded:
+  allOf:
+    - $ref: '#/Author'
+    - type: object
+      properties:
+        books_expanded:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              publication_year:
+                type: integer
+              description:
+                type: string
+
+AuthorCreateRequest:
+  type: object
+  required: [full_name, birth_date]
+  properties:
+    full_name:
+      type: string
+    birth_date:
+      type: string
+      format: date
+    books:
+      type: array
+      items:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+
+AuthorUpdateRequest:
+  type: object
+  properties:
+    full_name:
+      type: string
+    birth_date:
+      type: string
+      format: date
+    books:
+      type: array
+      items:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+
+ApiSuccessAuthorResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: success
+    data:
+      oneOf:
+        - $ref: '#/Author'
+        - $ref: '#/AuthorExpanded'
+
+ApiSuccessAuthorListResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: success
+    data:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/Author'
+          - $ref: '#/AuthorExpanded'
+    meta:
+      $ref: './schemas.errors.yaml#/ApiMeta'

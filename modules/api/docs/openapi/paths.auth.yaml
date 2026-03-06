@@ -1,0 +1,33 @@
+Login:
+  post:
+    tags: [Auth]
+    summary: Login de usuario y emision de token (30 minutos)
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: './base.yaml#/components/schemas/LoginRequest'
+          example:
+            username: admin
+            password: Admin123!
+    responses:
+      '200':
+        description: Token generado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessLoginResponse'
+      '401':
+        description: Credenciales invalidas
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '422':
+        description: Error de validacion
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ValidationErrorResponse'

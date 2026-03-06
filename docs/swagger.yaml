@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: Library API
+  version: 2.0.0
+  description: Entrada Swagger mantenible basada en especificaciones modulares.
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Auth
+  - name: Books
+  - name: Authors
+paths:
+  /api/login:
+    $ref: '../modules/api/docs/openapi/paths.auth.yaml#/Login'
+  /api/books:
+    $ref: '../modules/api/docs/openapi/paths.books.yaml#/BooksCollection'
+  /api/books/{id}:
+    $ref: '../modules/api/docs/openapi/paths.books.yaml#/BookItem'
+  /api/authors:
+    $ref: '../modules/api/docs/openapi/paths.authors.yaml#/AuthorsCollection'
+  /api/authors/{id}:
+    $ref: '../modules/api/docs/openapi/paths.authors.yaml#/AuthorItem'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+  parameters:
+    ObjectIdParam:
+      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/ObjectIdParam'
+    PageParam:
+      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/PageParam'
+    PerPageParam:
+      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/PerPageParam'
+    ExpandBooksParam:
+      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/ExpandBooksParam'
+    ExpandAuthorsParam:
+      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/ExpandAuthorsParam'
+  schemas:
+    ApiMeta:
+      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ApiMeta'
+    ApiErrorResponse:
+      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ApiErrorResponse'
+    ValidationErrorResponse:
+      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ValidationErrorResponse'
+    LoginRequest:
+      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/LoginRequest'
+    ApiSuccessLoginResponse:
+      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ApiSuccessLoginResponse'
+    Book:
+      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/Book'
+    BookExpanded:
+      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/BookExpanded'
+    BookCreateRequest:
+      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/BookCreateRequest'
+    BookUpdateRequest:
+      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/BookUpdateRequest'
+    ApiSuccessBookResponse:
+      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/ApiSuccessBookResponse'
+    ApiSuccessBookListResponse:
+      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/ApiSuccessBookListResponse'
+    Author:
+      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/Author'
+    AuthorExpanded:
+      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/AuthorExpanded'
+    AuthorCreateRequest:
+      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/AuthorCreateRequest'
+    AuthorUpdateRequest:
+      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/AuthorUpdateRequest'
+    ApiSuccessAuthorResponse:
+      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/ApiSuccessAuthorResponse'
+    ApiSuccessAuthorListResponse:
+      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/ApiSuccessAuthorListResponse'
+security:
+  - bearerAuth: []

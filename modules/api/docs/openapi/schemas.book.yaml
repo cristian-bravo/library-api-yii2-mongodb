@@ -1,0 +1,97 @@
+Book:
+  type: object
+  properties:
+    id:
+      type: string
+      example: 65f6f18e79ad6f8a3fca53a1
+    title:
+      type: string
+      example: Clean Architecture
+    authors:
+      type: array
+      items:
+        type: string
+        example: 65f6f18e79ad6f8a3fca53ff
+    publication_year:
+      type: integer
+      example: 2017
+    description:
+      type: string
+      example: Practicas de arquitectura para software mantenible.
+
+BookExpanded:
+  allOf:
+    - $ref: '#/Book'
+    - type: object
+      properties:
+        authors_expanded:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              full_name:
+                type: string
+              birth_date:
+                type: string
+                format: date
+
+BookCreateRequest:
+  type: object
+  required: [title, authors, publication_year]
+  properties:
+    title:
+      type: string
+    authors:
+      type: array
+      minItems: 1
+      items:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+    publication_year:
+      type: integer
+    description:
+      type: string
+
+BookUpdateRequest:
+  type: object
+  properties:
+    title:
+      type: string
+    authors:
+      type: array
+      minItems: 1
+      items:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+    publication_year:
+      type: integer
+    description:
+      type: string
+
+ApiSuccessBookResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: success
+    data:
+      oneOf:
+        - $ref: '#/Book'
+        - $ref: '#/BookExpanded'
+
+ApiSuccessBookListResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: success
+    data:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/Book'
+          - $ref: '#/BookExpanded'
+    meta:
+      $ref: './schemas.errors.yaml#/ApiMeta'

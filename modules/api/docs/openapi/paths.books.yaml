@@ -1,0 +1,158 @@
+BooksCollection:
+  get:
+    tags: [Books]
+    summary: Listar libros
+    parameters:
+      - $ref: './base.yaml#/components/parameters/PageParam'
+      - $ref: './base.yaml#/components/parameters/PerPageParam'
+      - $ref: './base.yaml#/components/parameters/ExpandAuthorsParam'
+    responses:
+      '200':
+        description: Lista de libros
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessBookListResponse'
+      '401':
+        description: No autorizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+  post:
+    tags: [Books]
+    summary: Crear libro
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: './base.yaml#/components/schemas/BookCreateRequest'
+          example:
+            title: Clean Architecture
+            authors:
+              - 65f6f18e79ad6f8a3fca53ff
+            publication_year: 2017
+            description: Practicas de arquitectura para software mantenible.
+    responses:
+      '201':
+        description: Libro creado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessBookResponse'
+      '422':
+        description: Error de validacion
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ValidationErrorResponse'
+      '401':
+        description: No autorizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+
+BookItem:
+  get:
+    tags: [Books]
+    summary: Obtener libro por ID
+    parameters:
+      - $ref: './base.yaml#/components/parameters/ObjectIdParam'
+      - $ref: './base.yaml#/components/parameters/ExpandAuthorsParam'
+    responses:
+      '200':
+        description: Libro encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessBookResponse'
+      '400':
+        description: ID invalido
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Libro no encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '401':
+        description: No autorizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+  put:
+    tags: [Books]
+    summary: Actualizar libro
+    parameters:
+      - $ref: './base.yaml#/components/parameters/ObjectIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: './base.yaml#/components/schemas/BookUpdateRequest'
+    responses:
+      '200':
+        description: Libro actualizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessBookResponse'
+      '422':
+        description: Error de validacion
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ValidationErrorResponse'
+      '400':
+        description: Solicitud invalida
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Libro no encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+  delete:
+    tags: [Books]
+    summary: Eliminar libro
+    parameters:
+      - $ref: './base.yaml#/components/parameters/ObjectIdParam'
+    responses:
+      '200':
+        description: Libro eliminado
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: success
+                data:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Book deleted successfully.
+      '400':
+        description: ID invalido
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Libro no encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'

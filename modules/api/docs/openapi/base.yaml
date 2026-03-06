@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info:
+  title: Library API
+  version: 2.0.0
+  description: API REST para gestion de biblioteca virtual (Yii2 + MongoDB).
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Auth
+  - name: Books
+  - name: Authors
+paths:
+  /api/login:
+    $ref: './paths.auth.yaml#/Login'
+  /api/books:
+    $ref: './paths.books.yaml#/BooksCollection'
+  /api/books/{id}:
+    $ref: './paths.books.yaml#/BookItem'
+  /api/authors:
+    $ref: './paths.authors.yaml#/AuthorsCollection'
+  /api/authors/{id}:
+    $ref: './paths.authors.yaml#/AuthorItem'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+  parameters:
+    ObjectIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+      description: MongoDB ObjectId.
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PerPageParam:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    ExpandBooksParam:
+      name: expand
+      in: query
+      schema:
+        type: string
+        example: books
+      description: Expandir relaciones (valor soportado `books`).
+    ExpandAuthorsParam:
+      name: expand
+      in: query
+      schema:
+        type: string
+        example: authors
+      description: Expandir relaciones (valor soportado `authors`).
+  schemas:
+    ApiMeta:
+      $ref: './schemas.errors.yaml#/ApiMeta'
+    ApiErrorResponse:
+      $ref: './schemas.errors.yaml#/ApiErrorResponse'
+    ValidationErrorResponse:
+      $ref: './schemas.errors.yaml#/ValidationErrorResponse'
+    LoginRequest:
+      $ref: './schemas.errors.yaml#/LoginRequest'
+    ApiSuccessLoginResponse:
+      $ref: './schemas.errors.yaml#/ApiSuccessLoginResponse'
+    Book:
+      $ref: './schemas.book.yaml#/Book'
+    BookExpanded:
+      $ref: './schemas.book.yaml#/BookExpanded'
+    BookCreateRequest:
+      $ref: './schemas.book.yaml#/BookCreateRequest'
+    BookUpdateRequest:
+      $ref: './schemas.book.yaml#/BookUpdateRequest'
+    ApiSuccessBookResponse:
+      $ref: './schemas.book.yaml#/ApiSuccessBookResponse'
+    ApiSuccessBookListResponse:
+      $ref: './schemas.book.yaml#/ApiSuccessBookListResponse'
+    Author:
+      $ref: './schemas.author.yaml#/Author'
+    AuthorExpanded:
+      $ref: './schemas.author.yaml#/AuthorExpanded'
+    AuthorCreateRequest:
+      $ref: './schemas.author.yaml#/AuthorCreateRequest'
+    AuthorUpdateRequest:
+      $ref: './schemas.author.yaml#/AuthorUpdateRequest'
+    ApiSuccessAuthorResponse:
+      $ref: './schemas.author.yaml#/ApiSuccessAuthorResponse'
+    ApiSuccessAuthorListResponse:
+      $ref: './schemas.author.yaml#/ApiSuccessAuthorListResponse'
+security:
+  - bearerAuth: []

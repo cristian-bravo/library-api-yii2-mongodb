@@ -1,0 +1,157 @@
+AuthorsCollection:
+  get:
+    tags: [Authors]
+    summary: Listar autores
+    parameters:
+      - $ref: './base.yaml#/components/parameters/PageParam'
+      - $ref: './base.yaml#/components/parameters/PerPageParam'
+      - $ref: './base.yaml#/components/parameters/ExpandBooksParam'
+    responses:
+      '200':
+        description: Lista de autores
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessAuthorListResponse'
+      '401':
+        description: No autorizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+  post:
+    tags: [Authors]
+    summary: Crear autor
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: './base.yaml#/components/schemas/AuthorCreateRequest'
+          example:
+            full_name: Robert C. Martin
+            birth_date: '1952-12-05'
+            books:
+              - 65f6f18e79ad6f8a3fca53a1
+    responses:
+      '201':
+        description: Autor creado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessAuthorResponse'
+      '422':
+        description: Error de validacion
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ValidationErrorResponse'
+      '401':
+        description: No autorizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+
+AuthorItem:
+  get:
+    tags: [Authors]
+    summary: Obtener autor por ID
+    parameters:
+      - $ref: './base.yaml#/components/parameters/ObjectIdParam'
+      - $ref: './base.yaml#/components/parameters/ExpandBooksParam'
+    responses:
+      '200':
+        description: Autor encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessAuthorResponse'
+      '400':
+        description: ID invalido
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Autor no encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '401':
+        description: No autorizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+  put:
+    tags: [Authors]
+    summary: Actualizar autor
+    parameters:
+      - $ref: './base.yaml#/components/parameters/ObjectIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: './base.yaml#/components/schemas/AuthorUpdateRequest'
+    responses:
+      '200':
+        description: Autor actualizado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiSuccessAuthorResponse'
+      '422':
+        description: Error de validacion
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ValidationErrorResponse'
+      '400':
+        description: Solicitud invalida
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Autor no encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+  delete:
+    tags: [Authors]
+    summary: Eliminar autor
+    parameters:
+      - $ref: './base.yaml#/components/parameters/ObjectIdParam'
+    responses:
+      '200':
+        description: Autor eliminado
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: success
+                data:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Author deleted successfully.
+      '400':
+        description: ID invalido
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'
+      '404':
+        description: Autor no encontrado
+        content:
+          application/json:
+            schema:
+              $ref: './base.yaml#/components/schemas/ApiErrorResponse'

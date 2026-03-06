@@ -1,0 +1,78 @@
+ApiMeta:
+  type: object
+  properties:
+    pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+
+ApiErrorResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: error
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: UNAUTHORIZED
+        message:
+          type: string
+          example: Invalid or expired token.
+
+ValidationErrorResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: error
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Title cannot be blank.
+        details:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+LoginRequest:
+  type: object
+  required: [username, password]
+  properties:
+    username:
+      type: string
+    password:
+      type: string
+
+ApiSuccessLoginResponse:
+  type: object
+  properties:
+    status:
+      type: string
+      example: success
+    data:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+        expires_in:
+          type: integer
+          example: 1800
