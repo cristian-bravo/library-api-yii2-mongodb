@@ -41,8 +41,8 @@
     "openapi:build": "php scripts/tools/openapi-build.php",
     "migrate:mongo": "php yii mongodb-migrate/up --interactive=0",
     "migrate:mongo:down": "php yii mongodb-migrate/down 1 --interactive=0",
-    "test": "phpunit",
-    "cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php",
-    "cs:check": "php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php"
+    "test": "@php vendor/bin/phpunit",
+    "cs:fix": "@php vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php",
+    "cs:check": "@php vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php"
   }
 }
