@@ -39,6 +39,11 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'GET api' => 'api/default/index',
+                'GET swagger' => 'docs/index',
+                'GET docs' => 'docs/index',
+                'GET swagger/openapi.yaml' => 'docs/openapi',
+                'GET docs/swagger.yaml' => 'docs/openapi',
                 [
                     'class' => UrlRule::class,
                     'controller' => ['api/book', 'api/author'],

@@ -101,10 +101,13 @@ $resolveNode = static function (mixed $node, string $currentFile, array $chain =
     if (isset($node['$ref']) && is_string($node['$ref'])) {
         [$refPath, $refPointer] = array_pad(explode('#', $node['$ref'], 2), 2, '');
 
-        if ($refPath !== '' && !str_starts_with($refPath, 'http://') && !str_starts_with($refPath, 'https://')) {
-            $targetFile = realpath(dirname($currentFile) . DIRECTORY_SEPARATOR . $refPath);
-            if ($targetFile === false) {
-                throw new RuntimeException(sprintf('Referenced file not found: %s', $refPath));
+        if (!str_starts_with($refPath, 'http://') && !str_starts_with($refPath, 'https://')) {
+            $targetFile = $currentFile;
+            if ($refPath !== '') {
+                $targetFile = realpath(dirname($currentFile) . DIRECTORY_SEPARATOR . $refPath);
+                if ($targetFile === false) {
+                    throw new RuntimeException(sprintf('Referenced file not found: %s', $refPath));
+                }
             }
 
             $chainKey = $targetFile . '#' . $refPointer;

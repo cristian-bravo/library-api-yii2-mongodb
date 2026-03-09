@@ -1,25 +1,1404 @@
 openapi: 3.0.3
 info:
-  title: Library API
+  title: 'Library API'
   version: 2.0.0
-  description: Entrada Swagger mantenible basada en especificaciones modulares.
+  description: 'API REST para gestion de biblioteca virtual (Yii2 + MongoDB).'
 servers:
-  - url: http://localhost:8080
+  -
+    url: 'http://localhost:8080'
 tags:
-  - name: Auth
-  - name: Books
-  - name: Authors
+  -
+    name: Auth
+  -
+    name: Books
+  -
+    name: Authors
 paths:
   /api/login:
-    $ref: '../modules/api/docs/openapi/paths.auth.yaml#/Login'
+    post:
+      tags:
+        - Auth
+      summary: 'Login de usuario y emision de token (30 minutos)'
+      security: {  }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+            example:
+              username: admin
+              password: Admin123!
+      responses:
+        200:
+          description: 'Token generado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiJ9...
+                      expires_in:
+                        type: integer
+                        example: 1800
+        401:
+          description: 'Credenciales invalidas'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        422:
+          description: 'Error de validacion'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: VALIDATION_ERROR
+                      message:
+                        type: string
+                        example: 'Title cannot be blank.'
+                      details:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
   /api/books:
-    $ref: '../modules/api/docs/openapi/paths.books.yaml#/BooksCollection'
-  /api/books/{id}:
-    $ref: '../modules/api/docs/openapi/paths.books.yaml#/BookItem'
+    get:
+      tags:
+        - Books
+      summary: 'Listar libros'
+      parameters:
+        -
+          name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        -
+          name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        -
+          name: expand
+          in: query
+          schema:
+            type: string
+            example: authors
+          description: 'Expandir relaciones (valor soportado `authors`).'
+      responses:
+        200:
+          description: 'Lista de libros'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      oneOf:
+                        -
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53a1
+                            title:
+                              type: string
+                              example: 'Clean Architecture'
+                            authors:
+                              type: array
+                              items:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53ff
+                            publication_year:
+                              type: integer
+                              example: 2017
+                            description:
+                              type: string
+                              example: 'Practicas de arquitectura para software mantenible.'
+                        -
+                          allOf:
+                            -
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53a1
+                                title:
+                                  type: string
+                                  example: 'Clean Architecture'
+                                authors:
+                                  type: array
+                                  items:
+                                    type: string
+                                    example: 65f6f18e79ad6f8a3fca53ff
+                                publication_year:
+                                  type: integer
+                                  example: 2017
+                                description:
+                                  type: string
+                                  example: 'Practicas de arquitectura para software mantenible.'
+                            -
+                              type: object
+                              properties:
+                                authors_expanded:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id: { type: string }
+                                      full_name: { type: string }
+                                      birth_date: { type: string, format: date }
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            example: 1
+                          per_page:
+                            type: integer
+                            example: 20
+                          total:
+                            type: integer
+                            example: 100
+        401:
+          description: 'No autorizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+    post:
+      tags:
+        - Books
+      summary: 'Crear libro'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - authors
+                - publication_year
+              properties:
+                title:
+                  type: string
+                authors:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                publication_year:
+                  type: integer
+                description:
+                  type: string
+            example:
+              title: 'Clean Architecture'
+              authors:
+                - 65f6f18e79ad6f8a3fca53ff
+              publication_year: 2017
+              description: 'Practicas de arquitectura para software mantenible.'
+      responses:
+        201:
+          description: 'Libro creado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    oneOf:
+                      -
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 65f6f18e79ad6f8a3fca53a1
+                          title:
+                            type: string
+                            example: 'Clean Architecture'
+                          authors:
+                            type: array
+                            items:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53ff
+                          publication_year:
+                            type: integer
+                            example: 2017
+                          description:
+                            type: string
+                            example: 'Practicas de arquitectura para software mantenible.'
+                      -
+                        allOf:
+                          -
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53a1
+                              title:
+                                type: string
+                                example: 'Clean Architecture'
+                              authors:
+                                type: array
+                                items:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53ff
+                              publication_year:
+                                type: integer
+                                example: 2017
+                              description:
+                                type: string
+                                example: 'Practicas de arquitectura para software mantenible.'
+                          -
+                            type: object
+                            properties:
+                              authors_expanded:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    full_name:
+                                      type: string
+                                    birth_date:
+                                      type: string
+                                      format: date
+        422:
+          description: 'Error de validacion'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: VALIDATION_ERROR
+                      message:
+                        type: string
+                        example: 'Title cannot be blank.'
+                      details:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+        401:
+          description: 'No autorizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+  '/api/books/{id}':
+    get:
+      tags:
+        - Books
+      summary: 'Obtener libro por ID'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          description: 'MongoDB ObjectId.'
+        -
+          name: expand
+          in: query
+          schema:
+            type: string
+            example: authors
+          description: 'Expandir relaciones (valor soportado `authors`).'
+      responses:
+        200:
+          description: 'Libro encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    oneOf:
+                      -
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 65f6f18e79ad6f8a3fca53a1
+                          title:
+                            type: string
+                            example: 'Clean Architecture'
+                          authors:
+                            type: array
+                            items:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53ff
+                          publication_year:
+                            type: integer
+                            example: 2017
+                          description:
+                            type: string
+                            example: 'Practicas de arquitectura para software mantenible.'
+                      -
+                        allOf:
+                          -
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53a1
+                              title:
+                                type: string
+                                example: 'Clean Architecture'
+                              authors:
+                                type: array
+                                items:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53ff
+                              publication_year:
+                                type: integer
+                                example: 2017
+                              description:
+                                type: string
+                                example: 'Practicas de arquitectura para software mantenible.'
+                          -
+                            type: object
+                            properties:
+                              authors_expanded:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    full_name:
+                                      type: string
+                                    birth_date:
+                                      type: string
+                                      format: date
+        400:
+          description: 'ID invalido'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        404:
+          description: 'Libro no encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        401:
+          description: 'No autorizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+    put:
+      tags:
+        - Books
+      summary: 'Actualizar libro'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          description: 'MongoDB ObjectId.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                authors:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                publication_year:
+                  type: integer
+                description:
+                  type: string
+      responses:
+        200:
+          description: 'Libro actualizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    oneOf:
+                      -
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 65f6f18e79ad6f8a3fca53a1
+                          title:
+                            type: string
+                            example: 'Clean Architecture'
+                          authors:
+                            type: array
+                            items:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53ff
+                          publication_year:
+                            type: integer
+                            example: 2017
+                          description:
+                            type: string
+                            example: 'Practicas de arquitectura para software mantenible.'
+                      -
+                        allOf:
+                          -
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53a1
+                              title:
+                                type: string
+                                example: 'Clean Architecture'
+                              authors:
+                                type: array
+                                items:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53ff
+                              publication_year:
+                                type: integer
+                                example: 2017
+                              description:
+                                type: string
+                                example: 'Practicas de arquitectura para software mantenible.'
+                          -
+                            type: object
+                            properties:
+                              authors_expanded:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    full_name:
+                                      type: string
+                                    birth_date:
+                                      type: string
+                                      format: date
+        422:
+          description: 'Error de validacion'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: VALIDATION_ERROR
+                      message:
+                        type: string
+                        example: 'Title cannot be blank.'
+                      details:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+        400:
+          description: 'Solicitud invalida'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        404:
+          description: 'Libro no encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+    delete:
+      tags:
+        - Books
+      summary: 'Eliminar libro'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          description: 'MongoDB ObjectId.'
+      responses:
+        200:
+          description: 'Libro eliminado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 'Book deleted successfully.'
+        400:
+          description: 'ID invalido'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        404:
+          description: 'Libro no encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
   /api/authors:
-    $ref: '../modules/api/docs/openapi/paths.authors.yaml#/AuthorsCollection'
-  /api/authors/{id}:
-    $ref: '../modules/api/docs/openapi/paths.authors.yaml#/AuthorItem'
+    get:
+      tags:
+        - Authors
+      summary: 'Listar autores'
+      parameters:
+        -
+          name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        -
+          name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        -
+          name: expand
+          in: query
+          schema:
+            type: string
+            example: books
+          description: 'Expandir relaciones (valor soportado `books`).'
+      responses:
+        200:
+          description: 'Lista de autores'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      oneOf:
+                        -
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53ff
+                            full_name:
+                              type: string
+                              example: 'Robert C. Martin'
+                            birth_date:
+                              type: string
+                              format: date
+                              example: '1952-12-05'
+                            books:
+                              type: array
+                              items:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53a1
+                        -
+                          allOf:
+                            -
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53ff
+                                full_name:
+                                  type: string
+                                  example: 'Robert C. Martin'
+                                birth_date:
+                                  type: string
+                                  format: date
+                                  example: '1952-12-05'
+                                books:
+                                  type: array
+                                  items:
+                                    type: string
+                                    example: 65f6f18e79ad6f8a3fca53a1
+                            -
+                              type: object
+                              properties:
+                                books_expanded:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id: { type: string }
+                                      title: { type: string }
+                                      publication_year: { type: integer }
+                                      description: { type: string }
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            example: 1
+                          per_page:
+                            type: integer
+                            example: 20
+                          total:
+                            type: integer
+                            example: 100
+        401:
+          description: 'No autorizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+    post:
+      tags:
+        - Authors
+      summary: 'Crear autor'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - full_name
+                - birth_date
+              properties:
+                full_name:
+                  type: string
+                birth_date:
+                  type: string
+                  format: date
+                books:
+                  type: array
+                  items:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+            example:
+              full_name: 'Robert C. Martin'
+              birth_date: '1952-12-05'
+              books:
+                - 65f6f18e79ad6f8a3fca53a1
+      responses:
+        201:
+          description: 'Autor creado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    oneOf:
+                      -
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 65f6f18e79ad6f8a3fca53ff
+                          full_name:
+                            type: string
+                            example: 'Robert C. Martin'
+                          birth_date:
+                            type: string
+                            format: date
+                            example: '1952-12-05'
+                          books:
+                            type: array
+                            items:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53a1
+                      -
+                        allOf:
+                          -
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53ff
+                              full_name:
+                                type: string
+                                example: 'Robert C. Martin'
+                              birth_date:
+                                type: string
+                                format: date
+                                example: '1952-12-05'
+                              books:
+                                type: array
+                                items:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53a1
+                          -
+                            type: object
+                            properties:
+                              books_expanded:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    title:
+                                      type: string
+                                    publication_year:
+                                      type: integer
+                                    description:
+                                      type: string
+        422:
+          description: 'Error de validacion'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: VALIDATION_ERROR
+                      message:
+                        type: string
+                        example: 'Title cannot be blank.'
+                      details:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+        401:
+          description: 'No autorizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+  '/api/authors/{id}':
+    get:
+      tags:
+        - Authors
+      summary: 'Obtener autor por ID'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          description: 'MongoDB ObjectId.'
+        -
+          name: expand
+          in: query
+          schema:
+            type: string
+            example: books
+          description: 'Expandir relaciones (valor soportado `books`).'
+      responses:
+        200:
+          description: 'Autor encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    oneOf:
+                      -
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 65f6f18e79ad6f8a3fca53ff
+                          full_name:
+                            type: string
+                            example: 'Robert C. Martin'
+                          birth_date:
+                            type: string
+                            format: date
+                            example: '1952-12-05'
+                          books:
+                            type: array
+                            items:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53a1
+                      -
+                        allOf:
+                          -
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53ff
+                              full_name:
+                                type: string
+                                example: 'Robert C. Martin'
+                              birth_date:
+                                type: string
+                                format: date
+                                example: '1952-12-05'
+                              books:
+                                type: array
+                                items:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53a1
+                          -
+                            type: object
+                            properties:
+                              books_expanded:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    title:
+                                      type: string
+                                    publication_year:
+                                      type: integer
+                                    description:
+                                      type: string
+        400:
+          description: 'ID invalido'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        404:
+          description: 'Autor no encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        401:
+          description: 'No autorizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+    put:
+      tags:
+        - Authors
+      summary: 'Actualizar autor'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          description: 'MongoDB ObjectId.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                birth_date:
+                  type: string
+                  format: date
+                books:
+                  type: array
+                  items:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+      responses:
+        200:
+          description: 'Autor actualizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    oneOf:
+                      -
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 65f6f18e79ad6f8a3fca53ff
+                          full_name:
+                            type: string
+                            example: 'Robert C. Martin'
+                          birth_date:
+                            type: string
+                            format: date
+                            example: '1952-12-05'
+                          books:
+                            type: array
+                            items:
+                              type: string
+                              example: 65f6f18e79ad6f8a3fca53a1
+                      -
+                        allOf:
+                          -
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 65f6f18e79ad6f8a3fca53ff
+                              full_name:
+                                type: string
+                                example: 'Robert C. Martin'
+                              birth_date:
+                                type: string
+                                format: date
+                                example: '1952-12-05'
+                              books:
+                                type: array
+                                items:
+                                  type: string
+                                  example: 65f6f18e79ad6f8a3fca53a1
+                          -
+                            type: object
+                            properties:
+                              books_expanded:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    title:
+                                      type: string
+                                    publication_year:
+                                      type: integer
+                                    description:
+                                      type: string
+        422:
+          description: 'Error de validacion'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: VALIDATION_ERROR
+                      message:
+                        type: string
+                        example: 'Title cannot be blank.'
+                      details:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+        400:
+          description: 'Solicitud invalida'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        404:
+          description: 'Autor no encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+    delete:
+      tags:
+        - Authors
+      summary: 'Eliminar autor'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          description: 'MongoDB ObjectId.'
+      responses:
+        200:
+          description: 'Autor eliminado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 'Author deleted successfully.'
+        400:
+          description: 'ID invalido'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
+        404:
+          description: 'Autor no encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHORIZED
+                      message:
+                        type: string
+                        example: 'Invalid or expired token.'
 components:
   securitySchemes:
     bearerAuth:
@@ -28,49 +1407,581 @@ components:
       bearerFormat: Token
   parameters:
     ObjectIdParam:
-      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/ObjectIdParam'
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+      description: 'MongoDB ObjectId.'
     PageParam:
-      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/PageParam'
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
     PerPageParam:
-      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/PerPageParam'
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
     ExpandBooksParam:
-      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/ExpandBooksParam'
+      name: expand
+      in: query
+      schema:
+        type: string
+        example: books
+      description: 'Expandir relaciones (valor soportado `books`).'
     ExpandAuthorsParam:
-      $ref: '../modules/api/docs/openapi/base.yaml#/components/parameters/ExpandAuthorsParam'
+      name: expand
+      in: query
+      schema:
+        type: string
+        example: authors
+      description: 'Expandir relaciones (valor soportado `authors`).'
   schemas:
     ApiMeta:
-      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ApiMeta'
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 100
     ApiErrorResponse:
-      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ApiErrorResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: UNAUTHORIZED
+            message:
+              type: string
+              example: 'Invalid or expired token.'
     ValidationErrorResponse:
-      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ValidationErrorResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: 'Title cannot be blank.'
+            details:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
     LoginRequest:
-      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/LoginRequest'
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
     ApiSuccessLoginResponse:
-      $ref: '../modules/api/docs/openapi/schemas.errors.yaml#/ApiSuccessLoginResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiJ9...
+            expires_in:
+              type: integer
+              example: 1800
     Book:
-      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/Book'
+      type: object
+      properties:
+        id:
+          type: string
+          example: 65f6f18e79ad6f8a3fca53a1
+        title:
+          type: string
+          example: 'Clean Architecture'
+        authors:
+          type: array
+          items:
+            type: string
+            example: 65f6f18e79ad6f8a3fca53ff
+        publication_year:
+          type: integer
+          example: 2017
+        description:
+          type: string
+          example: 'Practicas de arquitectura para software mantenible.'
     BookExpanded:
-      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/BookExpanded'
+      allOf:
+        -
+          type: object
+          properties:
+            id:
+              type: string
+              example: 65f6f18e79ad6f8a3fca53a1
+            title:
+              type: string
+              example: 'Clean Architecture'
+            authors:
+              type: array
+              items:
+                type: string
+                example: 65f6f18e79ad6f8a3fca53ff
+            publication_year:
+              type: integer
+              example: 2017
+            description:
+              type: string
+              example: 'Practicas de arquitectura para software mantenible.'
+        -
+          type: object
+          properties:
+            authors_expanded:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  full_name:
+                    type: string
+                  birth_date:
+                    type: string
+                    format: date
     BookCreateRequest:
-      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/BookCreateRequest'
+      type: object
+      required:
+        - title
+        - authors
+        - publication_year
+      properties:
+        title:
+          type: string
+        authors:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+        publication_year:
+          type: integer
+        description:
+          type: string
     BookUpdateRequest:
-      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/BookUpdateRequest'
+      type: object
+      properties:
+        title:
+          type: string
+        authors:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+        publication_year:
+          type: integer
+        description:
+          type: string
     ApiSuccessBookResponse:
-      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/ApiSuccessBookResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          oneOf:
+            -
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: 65f6f18e79ad6f8a3fca53a1
+                title:
+                  type: string
+                  example: 'Clean Architecture'
+                authors:
+                  type: array
+                  items:
+                    type: string
+                    example: 65f6f18e79ad6f8a3fca53ff
+                publication_year:
+                  type: integer
+                  example: 2017
+                description:
+                  type: string
+                  example: 'Practicas de arquitectura para software mantenible.'
+            -
+              allOf:
+                -
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: 65f6f18e79ad6f8a3fca53a1
+                    title:
+                      type: string
+                      example: 'Clean Architecture'
+                    authors:
+                      type: array
+                      items:
+                        type: string
+                        example: 65f6f18e79ad6f8a3fca53ff
+                    publication_year:
+                      type: integer
+                      example: 2017
+                    description:
+                      type: string
+                      example: 'Practicas de arquitectura para software mantenible.'
+                -
+                  type: object
+                  properties:
+                    authors_expanded:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          full_name:
+                            type: string
+                          birth_date:
+                            type: string
+                            format: date
     ApiSuccessBookListResponse:
-      $ref: '../modules/api/docs/openapi/schemas.book.yaml#/ApiSuccessBookListResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            oneOf:
+              -
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: 65f6f18e79ad6f8a3fca53a1
+                  title:
+                    type: string
+                    example: 'Clean Architecture'
+                  authors:
+                    type: array
+                    items:
+                      type: string
+                      example: 65f6f18e79ad6f8a3fca53ff
+                  publication_year:
+                    type: integer
+                    example: 2017
+                  description:
+                    type: string
+                    example: 'Practicas de arquitectura para software mantenible.'
+              -
+                allOf:
+                  -
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 65f6f18e79ad6f8a3fca53a1
+                      title:
+                        type: string
+                        example: 'Clean Architecture'
+                      authors:
+                        type: array
+                        items:
+                          type: string
+                          example: 65f6f18e79ad6f8a3fca53ff
+                      publication_year:
+                        type: integer
+                        example: 2017
+                      description:
+                        type: string
+                        example: 'Practicas de arquitectura para software mantenible.'
+                  -
+                    type: object
+                    properties:
+                      authors_expanded:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            full_name:
+                              type: string
+                            birth_date:
+                              type: string
+                              format: date
+        meta:
+          type: object
+          properties:
+            pagination:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  example: 1
+                per_page:
+                  type: integer
+                  example: 20
+                total:
+                  type: integer
+                  example: 100
     Author:
-      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/Author'
+      type: object
+      properties:
+        id:
+          type: string
+          example: 65f6f18e79ad6f8a3fca53ff
+        full_name:
+          type: string
+          example: 'Robert C. Martin'
+        birth_date:
+          type: string
+          format: date
+          example: '1952-12-05'
+        books:
+          type: array
+          items:
+            type: string
+            example: 65f6f18e79ad6f8a3fca53a1
     AuthorExpanded:
-      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/AuthorExpanded'
+      allOf:
+        -
+          type: object
+          properties:
+            id:
+              type: string
+              example: 65f6f18e79ad6f8a3fca53ff
+            full_name:
+              type: string
+              example: 'Robert C. Martin'
+            birth_date:
+              type: string
+              format: date
+              example: '1952-12-05'
+            books:
+              type: array
+              items:
+                type: string
+                example: 65f6f18e79ad6f8a3fca53a1
+        -
+          type: object
+          properties:
+            books_expanded:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  publication_year:
+                    type: integer
+                  description:
+                    type: string
     AuthorCreateRequest:
-      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/AuthorCreateRequest'
+      type: object
+      required:
+        - full_name
+        - birth_date
+      properties:
+        full_name:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        books:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
     AuthorUpdateRequest:
-      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/AuthorUpdateRequest'
+      type: object
+      properties:
+        full_name:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        books:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
     ApiSuccessAuthorResponse:
-      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/ApiSuccessAuthorResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          oneOf:
+            -
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: 65f6f18e79ad6f8a3fca53ff
+                full_name:
+                  type: string
+                  example: 'Robert C. Martin'
+                birth_date:
+                  type: string
+                  format: date
+                  example: '1952-12-05'
+                books:
+                  type: array
+                  items:
+                    type: string
+                    example: 65f6f18e79ad6f8a3fca53a1
+            -
+              allOf:
+                -
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: 65f6f18e79ad6f8a3fca53ff
+                    full_name:
+                      type: string
+                      example: 'Robert C. Martin'
+                    birth_date:
+                      type: string
+                      format: date
+                      example: '1952-12-05'
+                    books:
+                      type: array
+                      items:
+                        type: string
+                        example: 65f6f18e79ad6f8a3fca53a1
+                -
+                  type: object
+                  properties:
+                    books_expanded:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          title:
+                            type: string
+                          publication_year:
+                            type: integer
+                          description:
+                            type: string
     ApiSuccessAuthorListResponse:
-      $ref: '../modules/api/docs/openapi/schemas.author.yaml#/ApiSuccessAuthorListResponse'
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            oneOf:
+              -
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: 65f6f18e79ad6f8a3fca53ff
+                  full_name:
+                    type: string
+                    example: 'Robert C. Martin'
+                  birth_date:
+                    type: string
+                    format: date
+                    example: '1952-12-05'
+                  books:
+                    type: array
+                    items:
+                      type: string
+                      example: 65f6f18e79ad6f8a3fca53a1
+              -
+                allOf:
+                  -
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 65f6f18e79ad6f8a3fca53ff
+                      full_name:
+                        type: string
+                        example: 'Robert C. Martin'
+                      birth_date:
+                        type: string
+                        format: date
+                        example: '1952-12-05'
+                      books:
+                        type: array
+                        items:
+                          type: string
+                          example: 65f6f18e79ad6f8a3fca53a1
+                  -
+                    type: object
+                    properties:
+                      books_expanded:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            publication_year:
+                              type: integer
+                            description:
+                              type: string
+        meta:
+          type: object
+          properties:
+            pagination:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  example: 1
+                per_page:
+                  type: integer
+                  example: 20
+                total:
+                  type: integer
+                  example: 100
 security:
-  - bearerAuth: []
+  -
+    bearerAuth: {  }

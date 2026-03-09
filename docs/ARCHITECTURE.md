@@ -1,113 +1,130 @@
-# ARCHITECTURE.md - Library API
+# Arquitectura
 
-## 1) Visión general
+## Visión general
 
-Library API está construida en Yii2 con MongoDB y sigue una arquitectura por capas para mantener separadas las responsabilidades:
+Library API está construida con **Yii2 + MongoDB** y sigue una arquitectura por capas para separar responsabilidades y mantener el contrato HTTP estable.
 
-- `Controller`: capa HTTP
-- `Request`: validación/normalización de entrada
-- `DTO`: transporte de datos tipados
-- `Service`: reglas de negocio
-- `Repository`: persistencia MongoDB
-- `ApiResponse`: contrato de salida uniforme
+Flujo principal:
 
-## 2) Estructura principal
+`Controller -> Request -> DTO -> Service -> Repository -> MongoDB`
 
-```text
-modules/api
-  controllers/
-  requests/
-  dto/
-  services/
-  repositories/
-  filters/
-  exceptions/
-  responses/
-  docs/openapi/
-```
-
-## 3) Responsabilidades por capa
+## Capas del proyecto
 
 ### Controllers
 
-- Exponen endpoints públicos existentes (`/api/login`, `/api/books`, `/api/authors`).
-- Delegan todo a services.
-- Responden usando `ApiResponse`.
+Ubicación: `modules/api/controllers/`
+
+Responsabilidades:
+
+- exponer endpoints HTTP
+- delegar lógica a services
+- devolver datos usando `ApiResponse`
+- declarar verbos permitidos y acciones públicas
 
 ### Requests
 
-- Validan payloads de entrada.
-- Normalizan tipos y formato (ObjectId, fechas, strings).
-- Convierten a DTO.
+Ubicación: `modules/api/requests/`
 
-### DTO
+Responsabilidades:
 
-- Objetos inmutables para transferir datos entre capa HTTP y dominio.
+- validar payloads de entrada
+- normalizar tipos y formatos
+- convertir datos en DTOs
+
+### DTOs
+
+Ubicación: `modules/api/dto/`
+
+Responsabilidades:
+
+- transportar datos tipados entre capa HTTP y dominio
+- evitar pasar arrays crudos hacia los services
 
 ### Services
 
-- Implementan casos de uso:
-  - `BookService`
-  - `AuthorService`
-  - `AuthService`
-- Lógica de relaciones Books <-> Authors.
-- Lógica de token login.
+Ubicación: `modules/api/services/`
+
+Responsabilidades:
+
+- implementar casos de uso
+- aplicar reglas de negocio
+- sincronizar relaciones entre libros y autores
+- lanzar excepciones de dominio
+
+Servicios principales:
+
+- `AuthService`
+- `BookService`
+- `AuthorService`
 
 ### Repositories
 
-- Acceso a MongoDB con queries y paginación.
-- Encapsulan operaciones de lectura/escritura.
-- Definen índices recomendados en bootstrap del módulo.
+Ubicación: `modules/api/repositories/`
 
-### Exceptions
+Responsabilidades:
 
-- Excepciones de dominio explícitas:
-  - `ValidationException`
-  - `UnauthorizedException`
-  - `NotFoundException`
-  - `DomainException`
+- encapsular acceso a MongoDB
+- centralizar búsquedas, paginación y persistencia
+- definir operaciones de sincronización entre entidades relacionadas
 
-### Responses
+### Filters y Responses
 
-- `ApiResponse` unifica contrato:
-  - `success` => `{status,data,meta}`
-  - `error` => `{status,error:{code,message,details}}`
+Ubicación:
 
-## 4) Flujo request -> response
+- `modules/api/filters/`
+- `modules/api/responses/`
 
-```text
-Client -> Controller -> Request -> DTO -> Service -> Repository -> MongoDB
-                                              |
-                                              v
-                                        Domain Exceptions
-                                              |
-                                              v
-                                       ApiExceptionFilter
-                                              |
-                                              v
-                                         ApiResponse
+Responsabilidades:
+
+- autenticar requests (`TokenAuthFilter`)
+- mapear excepciones a HTTP (`ApiExceptionFilter`)
+- unificar el contrato de salida (`ApiResponse`)
+
+## Contrato de respuesta
+
+### Éxito
+
+```json
+{
+  "status": "success",
+  "data": {},
+  "meta": {}
+}
 ```
 
-## 5) Seguridad
+### Error
+
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Title cannot be blank.",
+    "details": {}
+  }
+}
+```
+
+## Seguridad
 
 ### TokenAuthFilter
 
-- Lee `Authorization: Bearer <token>`.
-- Valida formato del header.
-- Valida token y expiración (TTL default 1800 segundos configurable).
-- Bloquea endpoints protegidos con `401` cuando no aplica.
+- lee `Authorization: Bearer <token>`
+- valida formato del header
+- verifica expiración del token
+- protege endpoints excepto acciones públicas declaradas en cada controller
 
 ### ApiExceptionFilter
 
-Mapeo centralizado:
+Mapeo de excepciones:
 
 - `ValidationException` -> `422`
 - `UnauthorizedException` -> `401`
 - `NotFoundException` -> `404`
 - `DomainException` -> `400`
-- `Throwable` -> `500` (con logging técnico)
+- `Throwable` -> `500`
 
-## 6) OpenAPI modular
+## OpenAPI modular
 
 Fuente modular:
 
@@ -115,18 +132,39 @@ Fuente modular:
 - `modules/api/docs/openapi/paths.*.yaml`
 - `modules/api/docs/openapi/schemas.*.yaml`
 
-Bundling:
+Build:
 
-- Script: `scripts/tools/openapi-build.php`
-- Comando: `composer openapi:build`
-- Salidas:
-  - `modules/api/docs/openapi.generated.yaml` (artefacto local, no versionado)
-  - `docs/swagger.yaml` (artefacto versionado para consumo)
+- script: `scripts/tools/openapi-build.php`
+- comando: `composer openapi:build`
 
-## 7) Compatibilidad de contrato
+Artefactos:
 
-El refactor mantiene compatibilidad con:
+- `modules/api/docs/openapi.generated.yaml` (local)
+- `docs/swagger.yaml` (versionado)
 
-- Endpoints/verbos públicos existentes
-- Formato de `ApiResponse`
-- Header Bearer token
+Consumo:
+
+- Swagger UI: `http://localhost:8080/swagger`
+- YAML: `http://localhost:8080/swagger/openapi.yaml`
+
+## Estructura resumida
+
+```text
+modules/api/
+  controllers/
+  dto/
+  exceptions/
+  filters/
+  repositories/
+  requests/
+  responses/
+  services/
+  docs/openapi/
+```
+
+## Decisiones relevantes
+
+- **MongoDB** permite modelar relaciones flexibles entre libros y autores.
+- **Services** centralizan la lógica de sincronización cruzada para evitar inconsistencias.
+- **OpenAPI modular** reduce duplicación y facilita mantenimiento del contrato.
+- **Swagger UI integrado** mejora la revisión técnica y la validación manual del API.

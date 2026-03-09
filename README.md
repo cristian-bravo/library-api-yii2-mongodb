@@ -1,288 +1,276 @@
-﻿<div align="center">
+<p align="center">
+  <img src="docs/assets/library-api-logo.svg" alt="Library API logo" width="108" />
+</p>
 
-# Library API
-### RESTful API for Library Management
+<h1 align="center">Library API</h1>
 
-API REST desarrollada con **PHP, Yii2 y MongoDB** para administrar una biblioteca virtual de libros y autores.
+<p align="center">
+  <strong>API REST para gestionar libros y autores</strong><br />
+  Construida con <strong>PHP 8.1+</strong>, <strong>Yii2</strong>, <strong>MongoDB</strong> y <strong>OpenAPI 3.0.3</strong>.
+</p>
 
-![PHP](https://img.shields.io/badge/PHP-8%2B-blue?style=for-the-badge&logo=php)
-![Yii2](https://img.shields.io/badge/Yii2-Framework-green?style=for-the-badge)
-![MongoDB](https://img.shields.io/badge/MongoDB-Database-brightgreen?style=for-the-badge&logo=mongodb)
-![REST API](https://img.shields.io/badge/API-REST-orange?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-lightgrey?style=for-the-badge)
+<p align="center">
+  <a href="docs/README.md">
+    <img src="https://img.shields.io/badge/Docs-Technical-0F766E?style=flat-square&logo=readthedocs&logoColor=white" alt="Documentación técnica" />
+  </a>
+  <a href="docs/INSTALLATION.md">
+    <img src="https://img.shields.io/badge/Install-Step%20by%20Step-7C3AED?style=flat-square&logo=docker&logoColor=white" alt="Instalación paso a paso" />
+  </a>
+  <a href="docs/USAGE.md">
+    <img src="https://img.shields.io/badge/Guide-Usage-2563EB?style=flat-square&logo=bookstack&logoColor=white" alt="Guía de uso" />
+  </a>
+  <a href="docs/swagger.yaml">
+    <img src="https://img.shields.io/badge/OpenAPI-Bundle-65A30D?style=flat-square&logo=swagger&logoColor=white" alt="OpenAPI bundle" />
+  </a>
+</p>
 
-</div>
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP 8.1+" />
+  <img src="https://img.shields.io/badge/Yii2-2.0-40B3D8?style=flat-square&logo=yii&logoColor=white" alt="Yii2" />
+  <img src="https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/OpenAPI-3.0.3-6BA539?style=flat-square&logo=swagger&logoColor=white" alt="OpenAPI 3.0.3" />
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker Compose" />
+  <img src="https://img.shields.io/badge/Tests-PHPUnit-0A9EDC?style=flat-square&logo=phpunit&logoColor=white" alt="PHPUnit" />
+  <img src="https://img.shields.io/badge/License-MIT-111111?style=flat-square" alt="MIT License" />
+</p>
 
----
+<p align="center">
+  <img src="docs/assets/library-api-banner.svg" alt="Library API banner" width="100%" />
+</p>
 
-## Descripción
-
-**Library API** es una API REST para gestionar una biblioteca virtual con arquitectura por capas:
-
-`Request -> DTO -> Service -> Repository`
-
-Incluye:
-
-- Autenticación basada en token
-- Validación de datos
-- Manejo estructurado de errores
-- Documentación OpenAPI
-- Tests unitarios e integración
-
----
-
-## Tecnologías utilizadas
-
-| Tecnologia | Uso |
-|------------|-----|
-| PHP 8+ | Lenguaje backend |
-| Yii2 | Framework de desarrollo |
-| MongoDB | Base de datos NoSQL |
-| REST API | Arquitectura de comunicación |
-| Swagger / OpenAPI | Documentación |
-| PHPUnit | Pruebas |
-| Docker | Entorno local |
-
----
-
-## Arquitectura del sistema
-
-La API sigue una estructura modular basada en Yii2.
-
-| Carpeta / Archivo | Descripción |
-|-------------------|-------------|
-| `modules/api/controllers` | Endpoints REST (`Auth`, `Book`, `Author`) |
-| `modules/api/services` | Lógica de negocio |
-| `modules/api/repositories` | Acceso a datos |
-| `modules/api/requests` | Validación de entrada |
-| `modules/api/dto` | Objetos de transferencia |
-| `models` | Modelos MongoDB |
-| `config` | Configuración de aplicación y Mongo |
-| `migrations/mongodb` | Migraciones de colecciones/índices |
-| `modules/api/docs/openapi` | Especificaciones modulares OpenAPI |
-| `docs/swagger.yaml` | Especificación OpenAPI versionada |
+<p align="center">
+  <sub>API lista para revisión técnica, pruebas locales y documentación interactiva con Swagger UI.</sub>
+</p>
 
 ---
 
-## Modelo de datos
+## ✨ Descripción del proyecto
 
-### Books
+**Library API** es una API REST enfocada en la gestión de una biblioteca virtual. El proyecto está organizado con una arquitectura por capas que separa claramente transporte HTTP, validación, lógica de negocio y persistencia:
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `_id` | ObjectId | Identificador del libro |
-| `title` | string | Título del libro |
-| `authors` | ObjectId[] | Autores relacionados |
-| `publication_year` | integer | Año de publicación |
-| `description` | string | Descripción del libro |
+`Controller -> Request -> DTO -> Service -> Repository -> MongoDB`
 
-### Authors
+El repositorio está preparado para revisión técnica con:
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `_id` | ObjectId | Identificador del autor |
-| `full_name` | string | Nombre completo |
-| `birth_date` | date | Fecha de nacimiento |
-| `books` | ObjectId[] | Libros escritos |
-
-Relaciones:
-
-- Un libro puede tener múltiples autores.
-- Un autor puede haber escrito múltiples libros.
+- autenticación por bearer token con TTL configurable
+- respuestas JSON homogéneas
+- documentación OpenAPI modular y Swagger UI integrado
+- pruebas automatizadas sobre la aplicación Yii2
+- entorno reproducible con Docker Compose
 
 ---
 
-## Autenticación
+## 🎯 Características principales
 
-La API usa token con TTL configurable.
+| Área | Detalle |
+| --- | --- |
+| Autenticación | `POST /api/login` emite tokens temporales para endpoints protegidos |
+| Recursos | CRUD completo para libros y autores |
+| Contrato API | Respuesta consistente con `status`, `data`, `meta` y errores tipados |
+| Documentación | OpenAPI 3.0.3 bundleado y UI accesible en `/swagger` |
+| Arquitectura | Controllers delgados, validación en Requests, reglas en Services y acceso a datos en Repositories |
+| Operación local | Arranque con Docker Compose o con PHP local + MongoDB |
 
-- Endpoint: `POST /api/login`
-- TTL default: `TOKEN_TTL=1800` (30 minutos)
+---
 
-Ejemplo de respuesta:
+## 🧰 Tecnologías utilizadas
 
-```json
-{
-  "token": "TOKEN_GENERADO",
-  "expires_in": 1800
-}
+| Tecnología | Rol en el proyecto |
+| --- | --- |
+| PHP 8.1+ | Runtime principal |
+| Yii2 | Framework web y estructura modular |
+| MongoDB | Persistencia de libros, autores y usuarios |
+| Symfony YAML | Build del bundle OpenAPI |
+| PHPUnit | Suite de pruebas |
+| PHP CS Fixer | Revisión de estilo |
+| Docker Compose | Entorno local reproducible |
+
+---
+
+## 🎬 Demo local
+
+| Recurso | URL | Propósito |
+| --- | --- | --- |
+| API root | `http://localhost:8080/api` | Resumen de endpoints y links de documentación |
+| Swagger UI | `http://localhost:8080/swagger` | Exploración visual y ejecución de requests |
+| OpenAPI YAML | `http://localhost:8080/swagger/openapi.yaml` | Bundle listo para integraciones y revisiones |
+| MongoDB | `mongodb://localhost:27017` | Base de datos local expuesta por Docker |
+
+> Si ejecutas la app fuera de Docker, ajusta `MONGO_URI` a `mongodb://localhost:27017/library_db`.
+
+---
+
+## 🏗️ Arquitectura
+
+```mermaid
+flowchart LR
+    Client[Cliente HTTP] --> Controller[Controller]
+    Controller --> Request[Request]
+    Request --> DTO[DTO]
+    DTO --> Service[Service]
+    Service --> Repository[Repository]
+    Repository --> Mongo[(MongoDB)]
+    Service --> Exception[Domain Exceptions]
+    Exception --> Filter[ApiExceptionFilter]
+    Filter --> Response[ApiResponse JSON]
 ```
 
----
+### Capas clave
 
-## Endpoints de la API
+- **Controllers**: reciben requests y delegan trabajo sin lógica de negocio.
+- **Requests / DTOs**: validan y transportan datos tipados.
+- **Services**: aplican reglas de negocio, sincronizan relaciones y lanzan excepciones de dominio.
+- **Repositories**: encapsulan queries e índices MongoDB.
+- **Responses / Filters**: garantizan un contrato HTTP uniforme.
 
-### Público
-
-- `POST /api/login`
-
-### Books
-
-- `GET /api/books`
-- `GET /api/books/{id}`
-- `POST /api/books`
-- `PUT /api/books/{id}`
-- `DELETE /api/books/{id}`
-
-### Authors
-
-- `GET /api/authors`
-- `GET /api/authors/{id}`
-- `POST /api/authors`
-- `PUT /api/authors/{id}`
-- `DELETE /api/authors/{id}`
+Más detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
-## Manejo de errores
+## 🚀 Instalación
 
-Códigos HTTP comunes:
-
-- `200` OK
-- `201` Created
-- `400` Bad Request
-- `401` Unauthorized
-- `404` Not Found
-- `422` Validation Error
-- `500` Internal Server Error
-
-Formato estándar de error:
-
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Title is required",
-    "details": []
-  }
-}
-```
-
----
-
-## Configuración de entorno
-
-1. Copiar `.env.example` a `.env`.
-2. Ajustar valores según tu entorno.
-
-Variables base:
-
-- `MONGO_URI=mongodb://localhost:27017/library_db`
-- `TOKEN_TTL=1800`
-- `API_PAGE_SIZE=20`
-- `API_MAX_PAGE_SIZE=100`
-- `APP_ENV=dev`
-- `APP_DEBUG=true`
-
----
-
-## Instalación y ejecución
-
-### Local
+### Opción A: Docker Compose
 
 ```bash
+cp .env.example .env
+docker compose up --build -d
+docker compose exec -T app composer migrate:mongo
+```
+
+### Opción B: Local sin Docker
+
+Requisitos:
+
+- PHP 8.1+
+- extensión `mongodb`
+- Composer
+- MongoDB corriendo localmente
+
+```bash
+cp .env.example .env
+# Cambiar MONGO_URI a mongodb://localhost:27017/library_db
 composer install
-php yii serve
-```
-
-Servidor local:
-
-- `http://localhost:8080`
-
-### Docker
-
-```bash
-docker compose up --build
-```
-
-API en Docker:
-
-- `http://localhost:8080/api`
-
-Detener:
-
-```bash
-docker compose down
-```
-
-Eliminar volúmenes:
-
-```bash
-docker compose down -v
-```
-
----
-
-## Base de datos y migraciones
-
-Ejecutar migraciones Mongo:
-
-```bash
 composer migrate:mongo
-```
-
-Revertir última migración:
-
-```bash
-composer migrate:mongo:down
+composer serve
 ```
 
 ---
 
-## Testing y calidad
+## ▶️ Uso
 
-Correr tests:
+### 1. Levantar la aplicación
 
 ```bash
-composer test
+docker compose up --build -d
 ```
 
-Alternativa:
+### 2. Ejecutar migraciones
 
 ```bash
-vendor/bin/phpunit
+docker compose exec -T app composer migrate:mongo
 ```
 
-Code style:
+### 3. Explorar la documentación
+
+- Swagger UI: `http://localhost:8080/swagger`
+- OpenAPI: `http://localhost:8080/swagger/openapi.yaml`
+
+### 4. Obtener un token
 
 ```bash
-composer cs:check
-composer cs:fix
+curl --request POST "http://localhost:8080/api/login" \
+  --header "Content-Type: application/json" \
+  --data "{\"username\":\"admin\",\"password\":\"Admin123!\"}"
+```
+
+### 5. Consultar un endpoint protegido
+
+```bash
+curl --request GET "http://localhost:8080/api/books" \
+  --header "Authorization: Bearer <TOKEN>"
+```
+
+La guía operativa completa está en [docs/USAGE.md](docs/USAGE.md).
+
+---
+
+## 📁 Estructura del proyecto
+
+```text
+.
+├── commons/                 # Constantes y helpers compartidos
+├── config/                  # Configuración web, consola y MongoDB
+├── controllers/             # Controllers web no API (Swagger UI, docs)
+├── docker/                  # Dockerfile, nginx y php.ini
+├── docs/                    # Documentación técnica y artefactos OpenAPI
+├── migrations/mongodb/      # Migraciones e índices MongoDB
+├── models/                  # ActiveRecord MongoDB
+├── modules/api/             # Módulo principal de la API
+│   ├── controllers/         # Endpoints REST
+│   ├── docs/openapi/        # Especificación OpenAPI modular
+│   ├── dto/                 # DTOs tipados
+│   ├── exceptions/          # Excepciones de dominio
+│   ├── filters/             # Filtros HTTP (auth, errores)
+│   ├── repositories/        # Acceso a datos
+│   ├── requests/            # Validación y normalización
+│   ├── responses/           # Contrato JSON estándar
+│   └── services/            # Casos de uso
+├── public/                  # Web root para Docker/Nginx
+├── scripts/tools/           # Automatización del bundle OpenAPI
+├── tests/                   # Pruebas API, service-level y soporte
+└── views/docs/              # Vista personalizada de Swagger UI
 ```
 
 ---
 
-## OpenAPI
+## 📚 Documentación adicional
 
-Generar bundle desde specs modulares:
+| Documento | Contenido |
+| --- | --- |
+| [docs/README.md](docs/README.md) | Índice técnico y mapa de la documentación |
+| [docs/INSTALLATION.md](docs/INSTALLATION.md) | Instalación con Docker paso a paso desde cero |
+| [docs/USAGE.md](docs/USAGE.md) | Quickstart operativo, login y ejemplos con `curl` |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Capas, flujo request/response y componentes |
+| [docs/STYLEGUIDE.md](docs/STYLEGUIDE.md) | Convenciones de código y reglas de mantenimiento |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Guía de contribución y checklist de PR |
+
+---
+
+## 🧪 Testing y calidad
+
+### Ejecutar pruebas
 
 ```bash
-composer openapi:build
+docker compose exec -T app vendor/bin/phpunit
 ```
 
-Salida:
+### Generar OpenAPI bundle
 
-- `modules/api/docs/openapi.generated.yaml` (local)
-- `docs/swagger.yaml` (versionado)
+```bash
+docker compose exec -T app composer openapi:build
+```
+
+### Revisar estilo
+
+```bash
+docker compose exec -T app composer cs:check
+```
+
+Notas:
+
+- La suite de pruebas usa el `MONGO_URI` del entorno activo (`.env` o variables del sistema).
+- En un flujo Docker, el valor recomendado es `mongodb://mongo:27017/library_db`.
+- El proyecto ya incluye `.gitattributes` para ayudar a estabilizar finales de línea entre Windows y Linux.
 
 ---
 
-## Documentación adicional
+## 👤 Autor
 
-- `docs/README.md`
-- `docs/ARCHITECTURE.md`
-- `docs/STYLEGUIDE.md`
-- `CONTRIBUTING.md`
+**Cristian Bravo**  
+Desarrollador Full-Stack
 
 ---
 
-## Objetivo del proyecto
+## 📄 Licencia
 
-Proyecto para demostrar el diseño e implementación de una API REST escalable con Yii2 y MongoDB, aplicando buenas prácticas de arquitectura backend.
-
-## Autor
-
-Cristian Bravo  
-Desarrollador Full-Stack 
-
+Este proyecto se distribuye bajo licencia **MIT**.

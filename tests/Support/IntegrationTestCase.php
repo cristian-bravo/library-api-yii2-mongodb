@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace tests\Support;
 
+use app\commons\constants\ErrorCodes;
+use app\commons\constants\HttpStatus;
+use app\modules\api\exceptions\DomainException;
+use app\modules\api\exceptions\NotFoundException;
+use app\modules\api\exceptions\UnauthorizedException;
+use app\modules\api\exceptions\ValidationException;
 use app\modules\api\repositories\UserRepository;
+use app\modules\api\responses\ApiResponse;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yii;
+use yii\web\HttpException;
 
 abstract class IntegrationTestCase extends TestCase
 {
@@ -92,8 +100,55 @@ abstract class IntegrationTestCase extends TestCase
 
         TestApplication::resetResponse();
 
-        /** @var array<string, mixed> $result */
-        $result = Yii::$app->runAction($route, $routeParams);
+        try {
+            /** @var array<string, mixed> $result */
+            $result = Yii::$app->runAction($route, $routeParams);
+        } catch (ValidationException $exception) {
+            $result = ApiResponse::error(
+                $exception->getErrorCode(),
+                $exception->getMessage(),
+                $exception->getDetails(),
+                HttpStatus::UNPROCESSABLE_ENTITY
+            );
+        } catch (UnauthorizedException $exception) {
+            $result = ApiResponse::error(
+                $exception->getErrorCode(),
+                $exception->getMessage(),
+                $exception->getDetails(),
+                HttpStatus::UNAUTHORIZED
+            );
+        } catch (NotFoundException $exception) {
+            $result = ApiResponse::error(
+                $exception->getErrorCode(),
+                $exception->getMessage(),
+                $exception->getDetails(),
+                HttpStatus::NOT_FOUND
+            );
+        } catch (DomainException $exception) {
+            $result = ApiResponse::error(
+                $exception->getErrorCode(),
+                $exception->getMessage(),
+                $exception->getDetails(),
+                HttpStatus::BAD_REQUEST
+            );
+        } catch (HttpException $exception) {
+            $result = ApiResponse::error(
+                ErrorCodes::DOMAIN_ERROR,
+                $exception->getMessage(),
+                [],
+                $exception->statusCode
+            );
+        } catch (Throwable $exception) {
+            Yii::error($exception, __METHOD__);
+
+            $result = ApiResponse::error(
+                ErrorCodes::INTERNAL_ERROR,
+                'Internal server error.',
+                [],
+                HttpStatus::INTERNAL_SERVER_ERROR
+            );
+        }
+
         return $result;
     }
 

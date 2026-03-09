@@ -1,81 +1,52 @@
-# STYLEGUIDE.md - Convenciones de código (Library API)
+# Style Guide
 
-## 1) Convenciones de nombres
+## Convenciones de nombres
 
-- Clases: `PascalCase`
-- Métodos/variables: `camelCase`
-- Constantes: `UPPER_SNAKE_CASE`
-- DTO/Request: nombres explícitos por caso de uso:
-  - `BookCreateDto`, `BookUpdateRequest`
-- Evitar abreviaturas ambiguas (`usr`, `bk`, etc.).
+- clases: `PascalCase`
+- métodos y variables: `camelCase`
+- constantes: `UPPER_SNAKE_CASE`
+- DTOs y Requests: nombrar por caso de uso, por ejemplo `BookCreateDto` y `AuthorUpdateRequest`
 
-## 2) Arquitectura por capas
+## Regla arquitectónica
 
-Flujo obligatorio:
+Siempre respetar este flujo:
 
-1. `Controller` recibe request HTTP.
-2. `Request` valida y normaliza entrada.
-3. `DTO` transporta datos tipados al dominio.
-4. `Service` aplica reglas de negocio.
+1. `Controller` recibe el request HTTP.
+2. `Request` valida y normaliza.
+3. `DTO` transporta los datos.
+4. `Service` aplica lógica de negocio.
 5. `Repository` interactúa con MongoDB.
-6. `ApiResponse` estandariza salida.
+6. `ApiResponse` construye la salida.
 
-## 3) Controllers (delgados)
+## Controllers
 
-- No lógica de negocio.
-- No queries Mongo directas.
-- No validaciones complejas.
-- Tamaño objetivo por acción: `10-30` líneas.
+- deben ser delgados
+- no deben contener queries ni lógica de negocio
+- deben declarar verbos HTTP con claridad
+- deben delegar la validación compleja a Requests
 
-Ejemplo:
+## Services
 
-```php
-public function actionCreate(): array
-{
-    $request = BookCreateRequest::fromPayload((array) Yii::$app->request->getBodyParams());
-    $book = $this->service()->create($request->toDto());
-    return ApiResponse::success($book, [], HttpStatus::CREATED);
-}
-```
+- implementan reglas de negocio
+- orquestan relaciones entre entidades
+- lanzan excepciones de dominio cuando algo falla
+- no deben depender de `Yii::$app->request`
 
-## 4) Services
+## Repositories
 
-- Implementan reglas de negocio y consistencia entre entidades.
-- Lanzan excepciones de dominio (`ValidationException`, `NotFoundException`, etc.).
-- No usan superglobales ni parsing HTTP.
+- encapsulan toda interacción con persistencia
+- centralizan paginación y búsquedas
+- documentan índices y operaciones críticas
 
-Ejemplo:
+## Requests y DTOs
 
-```php
-if (!$this->authorRepository->existsByIds($dto->authors)) {
-    throw new ValidationException('One or more authors do not exist.', [
-        'authors' => ['One or more authors do not exist.'],
-    ]);
-}
-```
+- `Request`: valida, normaliza y traduce entrada
+- `DTO`: estructura tipada y simple para el dominio
+- no enviar arrays HTTP crudos directamente a services
 
-## 5) Repositories
+## Respuestas API
 
-- Único lugar con acceso a persistencia MongoDB.
-- Deben documentar índices y consultas clave.
-- Paginación obligatoria para listados.
-- Para relaciones, usar actualización en lote (evitar N+1).
-
-Índices mínimos:
-
-- `books.title`
-- `books.publication_year`
-- `authors.full_name`
-
-## 6) Requests y DTOs
-
-- `Request`: validar y normalizar (`trim`, tipos, ObjectId, defaults).
-- `DTO`: estructura de datos tipada y limpia.
-- Nunca pasar `Yii::$app->request` al service.
-
-## 7) Respuestas API
-
-Formato éxito:
+### Respuesta exitosa
 
 ```json
 {
@@ -85,7 +56,7 @@ Formato éxito:
 }
 ```
 
-Formato error:
+### Respuesta de error
 
 ```json
 {
@@ -98,24 +69,26 @@ Formato error:
 }
 ```
 
-## 8) Manejo de errores
+## Errores y seguridad
 
-Mapeo centralizado en `ApiExceptionFilter`:
+- `500` no debe exponer detalles sensibles
+- no registrar contraseñas ni tokens completos
+- mantener consistente el mapeo de excepciones en `ApiExceptionFilter`
 
-- `ValidationException` -> `422`
-- `UnauthorizedException` -> `401`
-- `NotFoundException` -> `404`
-- `DomainException` -> `400`
-- `Throwable` -> `500`
+## OpenAPI
 
-Regla: los errores `500` no deben exponer datos sensibles.
+- toda modificación en contrato HTTP debe reflejarse en `modules/api/docs/openapi/`
+- después de editar specs modulares, ejecutar `composer openapi:build`
+- verificar `docs/swagger.yaml` y `/swagger`
 
-## 9) Logging
+## Testing
 
-- Loggear excepciones `500` con contexto técnico.
-- Nunca registrar contraseñas, tokens completos ni payload sensible.
+- las pruebas API y de services dependen de MongoDB accesible por `MONGO_URI`
+- antes de validar cambios grandes, correr `vendor/bin/phpunit`
+- usar `composer cs:check` antes de merge cuando el entorno de finales de línea esté normalizado
 
-## 10) Comentarios y docblocks
+## Comentarios y docblocks
 
-- Usar comentarios solo cuando aporten contexto no obvio.
-- Docblocks requeridos para métodos públicos complejos y estructuras de retorno.
+- comentar solo cuando el código no sea evidente por sí mismo
+- usar docblocks en métodos públicos con retornos estructurados o comportamientos no triviales
+- preferir nombres descriptivos antes que comentarios redundantes

@@ -1,0 +1,62 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Library API banner</title>
+  <desc id="desc">Visual summary of the Library API project built with Yii2 and MongoDB.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4EBDD"/>
+      <stop offset="0.55" stop-color="#F9F4EC"/>
+      <stop offset="1" stop-color="#EDF6F1"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="143" y1="80" x2="560" y2="350" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1F6B65"/>
+      <stop offset="1" stop-color="#134844"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="806" y1="74" x2="1070" y2="246" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C98C4E"/>
+      <stop offset="1" stop-color="#8A5725"/>
+    </linearGradient>
+    <filter id="shadow" x="95" y="48" width="1010" height="330" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="20"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.172549 0 0 0 0 0.196078 0 0 0 0 0.180392 0 0 0 0.16 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="420" rx="32" fill="url(#bg)"/>
+  <circle cx="148" cy="68" r="88" fill="#1F6B65" fill-opacity="0.08"/>
+  <circle cx="1080" cy="74" r="104" fill="#C98C4E" fill-opacity="0.14"/>
+  <circle cx="1038" cy="336" r="84" fill="#1F6B65" fill-opacity="0.08"/>
+  <g filter="url(#shadow)">
+    <rect x="135" y="70" width="930" height="270" rx="28" fill="#FFF9F1" fill-opacity="0.78"/>
+    <rect x="165" y="104" width="396" height="202" rx="24" fill="url(#teal)"/>
+    <rect x="594" y="104" width="437" height="118" rx="24" fill="#FFFDF9"/>
+    <rect x="594" y="238" width="437" height="68" rx="24" fill="#FFF4E7"/>
+    <text x="205" y="158" fill="#FDF9F2" font-size="17" font-family="Segoe UI, Arial, sans-serif" font-weight="700" letter-spacing="3">LIBRARY API</text>
+    <text x="205" y="212" fill="#FFFFFF" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700">REST API para libros</text>
+    <text x="205" y="252" fill="#D9ECE8" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700">y autores con Yii2</text>
+    <text x="205" y="288" fill="#D2E2DF" font-size="18" font-family="Segoe UI, Arial, sans-serif">Request - DTO - Service - Repository - MongoDB</text>
+    <rect x="618" y="126" width="90" height="34" rx="17" fill="#E6F4EF"/>
+    <rect x="720" y="126" width="88" height="34" rx="17" fill="#EEF2FF"/>
+    <rect x="820" y="126" width="112" height="34" rx="17" fill="#FFF1E0"/>
+    <text x="647" y="148" fill="#16504A" font-size="15" font-family="Segoe UI, Arial, sans-serif" font-weight="700">PHP 8.1+</text>
+    <text x="749" y="148" fill="#4B4AA8" font-size="15" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Yii2</text>
+    <text x="848" y="148" fill="#8C5725" font-size="15" font-family="Segoe UI, Arial, sans-serif" font-weight="700">MongoDB</text>
+    <text x="620" y="190" fill="#213B37" font-size="28" font-family="Georgia, 'Times New Roman', serif" font-weight="700">Documentacion, pruebas y OpenAPI</text>
+    <text x="620" y="214" fill="#5E706B" font-size="17" font-family="Segoe UI, Arial, sans-serif">Contrato uniforme, Swagger UI integrado y estructura lista para revision tecnica.</text>
+    <rect x="620" y="252" width="174" height="18" rx="9" fill="#DCECE7"/>
+    <rect x="806" y="252" width="92" height="18" rx="9" fill="#E8EEFF"/>
+    <rect x="910" y="252" width="97" height="18" rx="9" fill="#FFE4C4"/>
+    <text x="620" y="292" fill="#213B37" font-size="16" font-family="Segoe UI, Arial, sans-serif">/api  /swagger  /swagger/openapi.yaml</text>
+  </g>
+  <g>
+    <rect x="860" y="38" width="240" height="150" rx="28" fill="url(#gold)" fill-opacity="0.14"/>
+    <rect x="878" y="54" width="204" height="116" rx="22" fill="#FFF8EF"/>
+    <rect x="900" y="78" width="160" height="20" rx="10" fill="#E5F3EE"/>
+    <rect x="900" y="110" width="124" height="12" rx="6" fill="#F2E5D6"/>
+    <rect x="900" y="130" width="144" height="12" rx="6" fill="#F2E5D6"/>
+    <rect x="900" y="150" width="98" height="12" rx="6" fill="#F2E5D6"/>
+  </g>
+</svg>
